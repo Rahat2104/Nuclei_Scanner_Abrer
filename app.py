@@ -11,31 +11,36 @@ RESULTS_DIR = "results"
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 
-def is_valid_url(url):
+def valid_url(url):
     parsed = urlparse(url)
     return parsed.scheme in ["http", "https"] and parsed.netloc
 
 
-def load_results(file_path):
+def read_json_results(file_path):
+    results = []
+
     if not os.path.exists(file_path):
-        return []
+        return results
+
+    with open(file_path, "r", encoding="utf-8") as file:
+        content = file.read().strip()
+
+    if not content:
+        return results
 
     try:
-        with open(file_path, "r", encoding="utf-8") as file:
-            data = json.load(file)
-            if isinstance(data, list):
-                return data
-            return [data]
+        data = json.loads(content)
+        if isinstance(data, list):
+            return data
+        return [data]
     except json.JSONDecodeError:
-        results = []
-        with open(file_path, "r", encoding="utf-8") as file:
-            for line in file:
-                if line.strip():
-                    try:
-                        results.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        pass
-        return results
+        for line in content.splitlines():
+            try:
+                results.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+
+    return results
 
 
 @app.route("/")
@@ -47,7 +52,7 @@ def home():
 def scan():
     target = request.form.get("target", "").strip()
 
-    if not is_valid_url(target):
+    if not valid_url(target):
         return render_template(
             "index.html",
             error="Please enter a valid URL starting with http:// or https://"
@@ -59,49 +64,62 @@ def scan():
 
     cmd = [
         "nuclei",
-        "-u",
-        target,
-        "-json-export",
-        output_path,
-        "-silent"
+        "-u", target,
+        "-json-export", output_path,
+        "-silent",
+        "-c", "1",
+        "-rate-limit", "2",
+        "-timeout", "5",
+        "-retries", "1"
     ]
 
     try:
-        completed = subprocess.run(
+        scan_process = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=300
+            timeout=180
         )
+
+        results = read_json_results(output_path)
+
+        severity_count = {
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "info": 0,
+            "unknown": 0
+        }
+
+        for item in results:
+            severity = item.get("info", {}).get("severity", "unknown").lower()
+            if severity in severity_count:
+                severity_count[severity] += 1
+            else:
+                severity_count["unknown"] += 1
+
+        return render_template(
+            "index.html",
+            target=target,
+            results=results,
+            severity_count=severity_count,
+            filename=filename,
+            total_findings=len(results),
+            scan_error=scan_process.stderr
+        )
+
     except subprocess.TimeoutExpired:
         return render_template(
             "index.html",
-            error="Scan timed out. Try a smaller target."
+            error="The scan took too long and timed out. Try a smaller target."
         )
 
-    results = load_results(output_path)
-
-    severity_count = {
-        "critical": 0,
-        "high": 0,
-        "medium": 0,
-        "low": 0,
-        "info": 0,
-        "unknown": 0
-    }
-
-    for item in results:
-        severity = item.get("info", {}).get("severity", "unknown").lower()
-        severity_count[severity] = severity_count.get(severity, 0) + 1
-
-    return render_template(
-        "index.html",
-        target=target,
-        results=results,
-        filename=filename,
-        severity_count=severity_count,
-        stderr=completed.stderr
-    )
+    except Exception as e:
+        return render_template(
+            "index.html",
+            error=f"Scan failed: {str(e)}"
+        )
 
 
 @app.route("/reports/<filename>")
