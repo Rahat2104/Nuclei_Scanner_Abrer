@@ -1,0 +1,20 @@
+id: basic-http-check
+
+info:
+  name: Basic HTTP Response Check
+  author: student
+  severity: info
+  description: Checks whether the target website responds successfully.
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 301
+          - 302
+          - 403
