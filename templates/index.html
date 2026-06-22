@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nuclei Security Scanner</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #1e1e1e;
+            color: #f5f5f5;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: #2b2b2b;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #bbbbbb;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #444;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #666;
+        }
+
+        .error {
+            background: #5c1f1f;
+            color: #ffcccc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-box {
+            background: #3a3a3a;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .summary-box h2 {
+            margin: 0;
+            font-size: 28px;
+        }
+
+        .summary-box p {
+            margin: 5px 0 0;
+            color: #ccc;
+            text-transform: capitalize;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #262626;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background: #333;
+        }
+
+        tr:hover {
+            background: #363636;
+        }
+
+        a {
+            color: #dddddd;
+        }
+
+        .report-btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px 18px;
+            background: #444;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .report-btn:hover {
+            background: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Nuclei Security Scanner</h1>
+    <p class="subtitle">Cloud-based vulnerability scanner using Flask, Docker, Render, and Nuclei</p>
+
+    <div class="card">
+        <form action="/scan" method="post">
+            <input name="target" placeholder="https://example.com" required>
+            <button type="submit">Start Scan</button>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+    </div>
+
+    {% if target %}
+    <div class="card">
+        <h2>Scan Report</h2>
+        <p><strong>Target:</strong> {{ target }}</p>
+
+        {% if filename %}
+            <a class="report-btn" href="/reports/{{ filename }}">Download JSON Report</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if severity_count %}
+    <div class="card">
+        <h2>Dashboard Summary</h2>
+
+        <div class="summary">
+            {% for severity, count in severity_count.items() %}
+            <div class="summary-box">
+                <h2>{{ count }}</h2>
+                <p>{{ severity }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if results %}
+    <div class="card">
+        <h2>Findings</h2>
+
+        <table>
+            <tr>
+                <th>Severity</th>
+                <th>Name</th>
+                <th>Template ID</th>
+                <th>Matched URL</th>
+            </tr>
+
+            {% for item in results %}
+            <tr>
+                <td>{{ item.get("info", {}).get("severity", "unknown") }}</td>
+                <td>{{ item.get("info", {}).get("name", "N/A") }}</td>
+                <td>{{ item.get("template-id", "N/A") }}</td>
+                <td>{{ item.get("matched-at", item.get("host", "N/A")) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% elif target %}
+    <div class="card">
+        <h2>No Findings</h2>
+        <p>The scan completed, but Nuclei did not return any findings for this target.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
