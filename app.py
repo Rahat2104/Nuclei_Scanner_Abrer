@@ -283,11 +283,62 @@ def generate_ai_explanation(finding):
         f"{description if description else 'Review the finding and confirm whether it affects the target application.'}"
     )
 
+def load_scan_history():
+    if not os.path.exists(HISTORY_FILE):
+        return []
 
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as file:
+            history = json.load(file)
+
+        if isinstance(history, list):
+            return history
+
+        return []
+
+    except Exception:
+        return []
+
+
+def save_scan_history(history):
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+
+    with open(HISTORY_FILE, "w", encoding="utf-8") as file:
+        json.dump(history[:MAX_HISTORY], file, indent=2)
+
+
+def add_scan_history(target, output_file, findings, severity_data):
+    history = load_scan_history()
+
+    severity_counts = {}
+
+    for item in severity_data:
+        level = item.get("level", "info")
+        label = "advisory" if level == "info" else level
+        severity_counts[label] = item.get("count", 0)
+
+    entry = {
+        "scan_id": int(time.time()),
+        "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "target": target,
+        "output_file": output_file,
+        "total_findings": len(findings),
+        "severity_counts": severity_counts
+    }
+
+    history.insert(0, entry)
+    history = history[:MAX_HISTORY]
+
+    save_scan_history(history)
+
+    return history
+    
 @app.route("/")
 def home():
-    return render_template("index.html")
-
+    return render_template(
+        "index.html",
+        scan_history=load_scan_history()
+    )
 
 @app.route("/scan", methods=["POST"])
 def scan():
