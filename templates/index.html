@@ -1,714 +1,711 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuclei Security Scanner</title>
 
-```
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-<style>
-    * {
-        box-sizing: border-box;
-    }
-
-    :root {
-        --bg: #030303;
-        --panel: #0b0b0b;
-        --panel-soft: #111111;
-        --panel-light: #171717;
-        --border: rgba(255, 255, 255, 0.1);
-        --border-strong: rgba(255, 255, 255, 0.16);
-        --text: #f5f5f5;
-        --muted: #9ca3af;
-        --muted-2: #c4c4c4;
-        --accent: #ffd1a3;
-        --accent-2: #ffb86b;
-        --green: #55f38a;
-        --blue: #7dd3fc;
-        --danger: #ff6b6b;
-        --shadow: 0 30px 90px rgba(0, 0, 0, 0.65);
-    }
-
-    html {
-        scroll-behavior: smooth;
-    }
-
-    body {
-        margin: 0;
-        font-family: "Lexend", Arial, Helvetica, sans-serif;
-        background:
-            radial-gradient(circle at 50% 0%, rgba(255, 209, 163, 0.11), transparent 34%),
-            radial-gradient(circle at 80% 25%, rgba(125, 211, 252, 0.08), transparent 28%),
-            radial-gradient(circle at 20% 70%, rgba(85, 243, 138, 0.06), transparent 30%),
-            #030303;
-        color: var(--text);
-        min-height: 100vh;
-    }
-
-    .noise {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        opacity: 0.035;
-        background-image:
-            linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px);
-        background-size: 80px 80px;
-        mask-image: linear-gradient(to bottom, black, transparent 85%);
-    }
-
-    .nav {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        height: 68px;
-        border-bottom: 1px solid var(--border);
-        background: rgba(3, 3, 3, 0.78);
-        backdrop-filter: blur(18px);
-    }
-
-    .nav-inner {
-        max-width: 1100px;
-        height: 100%;
-        margin: 0 auto;
-        padding: 0 22px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 800;
-        letter-spacing: -0.4px;
-        font-size: 18px;
-    }
-
-    .brand-mark {
-        width: 28px;
-        height: 28px;
-        border-radius: 9px;
-        background:
-            linear-gradient(135deg, rgba(255, 209, 163, 1), rgba(255, 184, 107, 0.75));
-        display: grid;
-        place-items: center;
-        color: #000;
-        font-weight: 900;
-        box-shadow: 0 0 32px rgba(255, 209, 163, 0.22);
-    }
-
-    .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .nav-links a {
-        color: var(--muted-2);
-        text-decoration: none;
-        font-size: 14px;
-        padding: 9px 13px;
-        border-radius: 12px;
-        transition: 0.18s ease;
-    }
-
-    .nav-links a:hover {
-        color: white;
-        background: rgba(255, 255, 255, 0.06);
-    }
-
-    .nav-button {
-        border: 1px solid var(--border-strong);
-        color: white !important;
-        background: rgba(255, 255, 255, 0.04);
-    }
-
-    .page {
-        position: relative;
-        z-index: 1;
-    }
-
-    .hero {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 92px 22px 50px;
-        text-align: center;
-    }
-
-    .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        border: 1px solid rgba(255, 209, 163, 0.18);
-        background: rgba(255, 209, 163, 0.08);
-        color: #ffe0bd;
-        border-radius: 999px;
-        font-size: 13px;
-        margin-bottom: 26px;
-    }
-
-    .dot {
-        width: 8px;
-        height: 8px;
-        background: var(--green);
-        border-radius: 50%;
-        box-shadow: 0 0 18px rgba(85, 243, 138, 0.8);
-    }
-
-    h1 {
-        margin: 0;
-        font-size: clamp(48px, 7vw, 88px);
-        line-height: 0.97;
-        letter-spacing: -4px;
-        font-weight: 900;
-    }
-
-    .hero-title {
-        background: linear-gradient(180deg, #ffffff 15%, #d5d5d5 65%, #8b8b8b 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-        max-width: 760px;
-        margin: 26px auto 0;
-        color: var(--muted);
-        line-height: 1.8;
-        font-size: 18px;
-        font-weight: 400;
-    }
-
-    .hero-actions {
-        margin-top: 34px;
-        display: flex;
-        justify-content: center;
-        gap: 14px;
-        flex-wrap: wrap;
-    }
-
-    .primary-link,
-    .secondary-link {
-        text-decoration: none;
-        border-radius: 14px;
-        padding: 13px 18px;
-        font-size: 14px;
-        font-weight: 700;
-        transition: 0.18s ease;
-    }
-
-    .primary-link {
-        background: var(--accent);
-        color: #0a0a0a;
-        box-shadow: 0 18px 50px rgba(255, 209, 163, 0.17);
-    }
-
-    .secondary-link {
-        border: 1px solid var(--border-strong);
-        color: white;
-        background: rgba(255, 255, 255, 0.035);
-    }
-
-    .primary-link:hover,
-    .secondary-link:hover {
-        transform: translateY(-2px);
-    }
-
-    .main {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 22px 70px;
-    }
-
-    .terminal-section {
-        display: grid;
-        grid-template-columns: 1.05fr 0.95fr;
-        gap: 24px;
-        align-items: stretch;
-        margin-top: 20px;
-    }
-
-    .terminal-card,
-    .flow-card,
-    .results-card {
-        border: 1px solid var(--border);
-        background: rgba(11, 11, 11, 0.72);
-        box-shadow: var(--shadow);
-        border-radius: 26px;
-        overflow: hidden;
-        backdrop-filter: blur(16px);
-    }
-
-    .terminal-top {
-        height: 46px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 18px;
-        background: rgba(255, 255, 255, 0.025);
-    }
-
-    .terminal-dots {
-        display: flex;
-        gap: 8px;
-    }
-
-    .terminal-dots span {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.12);
-    }
-
-    .terminal-name {
-        color: var(--muted);
-        font-size: 13px;
-    }
-
-    .terminal-body {
-        padding: 26px;
-    }
-
-    .section-label {
-        color: var(--accent);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 800;
-        margin-bottom: 12px;
-    }
-
-    .terminal-body h2,
-    .flow-card h2,
-    .results-card h2 {
-        margin: 0;
-        font-size: 30px;
-        letter-spacing: -1px;
-    }
-
-    .terminal-body p,
-    .flow-card p {
-        margin: 14px 0 0;
-        color: var(--muted);
-        line-height: 1.7;
-        font-size: 15px;
-    }
-
-    .scan-form {
-        margin-top: 26px;
-        display: flex;
-        gap: 12px;
-    }
-
-    .input-wrap {
-        position: relative;
-        flex: 1;
-    }
-
-    .prompt {
-        position: absolute;
-        top: 50%;
-        left: 16px;
-        transform: translateY(-50%);
-        color: var(--accent);
-        font-weight: 800;
-        font-size: 14px;
-    }
-
-    input {
-        width: 100%;
-        border: 1px solid var(--border-strong);
-        background: #050505;
-        color: white;
-        padding: 16px 16px 16px 38px;
-        border-radius: 14px;
-        outline: none;
-        font-family: "Lexend", Arial, sans-serif;
-        font-size: 14px;
-        transition: 0.18s ease;
-    }
-
-    input:focus {
-        border-color: rgba(255, 209, 163, 0.55);
-        box-shadow: 0 0 0 4px rgba(255, 209, 163, 0.08);
-    }
-
-    input::placeholder {
-        color: #595959;
-    }
-
-    button {
-        border: none;
-        padding: 16px 20px;
-        min-width: 132px;
-        border-radius: 14px;
-        font-family: "Lexend", Arial, sans-serif;
-        font-size: 14px;
-        font-weight: 800;
-        cursor: pointer;
-        color: #0a0a0a;
-        background: var(--accent);
-        transition: 0.18s ease;
-        box-shadow: 0 18px 38px rgba(255, 209, 163, 0.15);
-    }
-
-    button:hover {
-        transform: translateY(-2px);
-        background: #ffdab8;
-    }
-
-    button:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    #msg {
-        min-height: 22px;
-        color: var(--accent);
-        font-size: 14px;
-        margin: 18px 0 0;
-        font-weight: 700;
-    }
-
-    .quick-targets {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
-    }
-
-    .quick-targets button {
-        min-width: auto;
-        padding: 9px 13px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.035);
-        color: var(--muted-2);
-        border: 1px solid var(--border);
-        box-shadow: none;
-        font-size: 12px;
-    }
-
-    .quick-targets button:hover {
-        background: rgba(255, 209, 163, 0.08);
-        color: var(--accent);
-    }
-
-    .flow-card {
-        padding: 26px;
-    }
-
-    .warning {
-        margin-top: 18px;
-        border: 1px solid rgba(255, 209, 163, 0.24);
-        background: rgba(255, 209, 163, 0.07);
-        color: #ffe0bd;
-        padding: 14px;
-        border-radius: 16px;
-        font-size: 13px;
-        line-height: 1.7;
-    }
-
-    .flow-list {
-        display: grid;
-        gap: 10px;
-        margin-top: 22px;
-    }
-
-    .flow-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 13px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.025);
-        border-radius: 15px;
-        color: var(--muted-2);
-        font-size: 14px;
-    }
-
-    .flow-num {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        background: rgba(255, 209, 163, 0.1);
-        color: var(--accent);
-        font-weight: 900;
-        font-size: 12px;
-        flex-shrink: 0;
-    }
-
-    .results-card {
-        margin-top: 28px;
-        padding: 26px;
-    }
-
-    .results-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        flex-wrap: wrap;
-        align-items: flex-start;
-    }
-
-    .target-box {
-        display: inline-block;
-        margin-top: 12px;
-        border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.025);
-        border-radius: 14px;
-        padding: 11px 13px;
-        color: var(--muted-2);
-        word-break: break-all;
-        font-size: 14px;
-    }
-
-    .download-row {
-        margin-top: 14px;
-    }
-
-    .download-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        border-radius: 14px;
-        padding: 12px 16px;
-        background: var(--accent);
-        color: #0a0a0a;
-        font-size: 13px;
-        font-weight: 900;
-        border: 1px solid rgba(255, 209, 163, 0.4);
-        box-shadow: 0 16px 34px rgba(255, 209, 163, 0.14);
-        transition: 0.18s ease;
-    }
-
-    .download-btn:hover {
-        transform: translateY(-2px);
-        background: #ffdab8;
-    }
-
-    .status {
-        display: inline-flex;
-        gap: 9px;
-        align-items: center;
-        border: 1px solid rgba(85, 243, 138, 0.25);
-        background: rgba(85, 243, 138, 0.08);
-        color: #b7ffc9;
-        padding: 10px 13px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 800;
-    }
-
-    .stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-        margin-top: 24px;
-    }
-
-    .stat {
-        border: 1px solid var(--border);
-        background: #070707;
-        border-radius: 18px;
-        padding: 20px;
-    }
-
-    .stat-value {
-        font-size: 34px;
-        color: var(--accent);
-        font-weight: 900;
-        letter-spacing: -1px;
-    }
-
-    .stat-label {
-        margin-top: 7px;
-        color: var(--muted);
-        font-size: 13px;
-    }
-
-    .table-shell {
-        margin-top: 24px;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        overflow: hidden;
-        background: #050505;
-    }
-
-    .table-header {
-        padding: 16px 18px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        flex-wrap: wrap;
-        color: var(--muted);
-        font-size: 13px;
-    }
-
-    .table-header strong {
-        color: white;
-        font-size: 15px;
-    }
-
-    .table-wrap {
-        overflow-x: auto;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 960px;
-    }
-
-    th {
-        color: white;
-        text-align: left;
-        padding: 15px 16px;
-        font-size: 13px;
-        border-bottom: 1px solid var(--border);
-        background: #0b0b0b;
-    }
-
-    td {
-        padding: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.07);
-        color: var(--muted-2);
-        font-size: 13px;
-        line-height: 1.5;
-        vertical-align: top;
-    }
-
-    tr:hover td {
-        background: rgba(255, 209, 163, 0.035);
-    }
-
-    .severity {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 209, 163, 0.24);
-        background: rgba(255, 209, 163, 0.08);
-        color: var(--accent);
-        font-size: 11px;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-    }
-
-    .template-name {
-        color: white;
-        font-weight: 700;
-    }
-
-    .empty-state {
-        margin-top: 22px;
-        border: 1px solid rgba(125, 211, 252, 0.18);
-        background: rgba(125, 211, 252, 0.055);
-        border-radius: 18px;
-        padding: 22px;
-        color: #dff6ff;
-        line-height: 1.7;
-    }
-
-    .logs {
-        margin-top: 22px;
-    }
-
-    .logs h3 {
-        margin: 0 0 10px;
-    }
-
-    pre {
-        margin: 0;
-        border: 1px solid var(--border);
-        background: #050505;
-        color: var(--muted-2);
-        border-radius: 16px;
-        padding: 16px;
-        overflow-x: auto;
-        white-space: pre-wrap;
-        line-height: 1.6;
-    }
-
-    .footer {
-        margin-top: 34px;
-        padding: 34px 0 10px;
-        text-align: center;
-        color: #777;
-        font-size: 13px;
-    }
-
-    .footer strong {
-        color: var(--accent);
-    }
-
-    .giant-watermark {
-        position: fixed;
-        left: 50%;
-        bottom: -50px;
-        transform: translateX(-50%);
-        font-size: clamp(90px, 16vw, 230px);
-        font-weight: 900;
-        color: rgba(255, 255, 255, 0.025);
-        pointer-events: none;
-        z-index: 0;
-        letter-spacing: -10px;
-        white-space: nowrap;
-    }
-
-    @media (max-width: 900px) {
-        .terminal-section {
-            grid-template-columns: 1fr;
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
         }
 
-        .stats {
-            grid-template-columns: 1fr;
+        :root {
+            --bg: #030303;
+            --panel: #0b0b0b;
+            --panel-soft: #111111;
+            --panel-light: #171717;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --text: #f5f5f5;
+            --muted: #9ca3af;
+            --muted-2: #c4c4c4;
+            --accent: #ffd1a3;
+            --accent-2: #ffb86b;
+            --green: #55f38a;
+            --blue: #7dd3fc;
+            --danger: #ff6b6b;
+            --shadow: 0 30px 90px rgba(0, 0, 0, 0.65);
         }
 
-        h1 {
-            letter-spacing: -2px;
+        html {
+            scroll-behavior: smooth;
         }
-    }
 
-    @media (max-width: 650px) {
-        .nav-links a:not(.nav-button) {
-            display: none;
+        body {
+            margin: 0;
+            font-family: "Lexend", Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255, 209, 163, 0.11), transparent 34%),
+                radial-gradient(circle at 80% 25%, rgba(125, 211, 252, 0.08), transparent 28%),
+                radial-gradient(circle at 20% 70%, rgba(85, 243, 138, 0.06), transparent 30%),
+                #030303;
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .noise {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.035;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: linear-gradient(to bottom, black, transparent 85%);
+        }
+
+        .nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            height: 68px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(3, 3, 3, 0.78);
+            backdrop-filter: blur(18px);
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            height: 100%;
+            margin: 0 auto;
+            padding: 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            font-size: 18px;
+        }
+
+        .brand-mark {
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            background:
+                linear-gradient(135deg, rgba(255, 209, 163, 1), rgba(255, 184, 107, 0.75));
+            display: grid;
+            place-items: center;
+            color: #000;
+            font-weight: 900;
+            box-shadow: 0 0 32px rgba(255, 209, 163, 0.22);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: var(--muted-2);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 9px 13px;
+            border-radius: 12px;
+            transition: 0.18s ease;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-button {
+            border: 1px solid var(--border-strong);
+            color: white !important;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
         }
 
         .hero {
-            padding-top: 60px;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 92px 22px 50px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border: 1px solid rgba(255, 209, 163, 0.18);
+            background: rgba(255, 209, 163, 0.08);
+            color: #ffe0bd;
+            border-radius: 999px;
+            font-size: 13px;
+            margin-bottom: 26px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 18px rgba(85, 243, 138, 0.8);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(48px, 7vw, 88px);
+            line-height: 0.97;
+            letter-spacing: -4px;
+            font-weight: 900;
+        }
+
+        .hero-title {
+            background: linear-gradient(180deg, #ffffff 15%, #d5d5d5 65%, #8b8b8b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 760px;
+            margin: 26px auto 0;
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .hero-actions {
+            margin-top: 34px;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .primary-link,
+        .secondary-link {
+            text-decoration: none;
+            border-radius: 14px;
+            padding: 13px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            transition: 0.18s ease;
+        }
+
+        .primary-link {
+            background: var(--accent);
+            color: #0a0a0a;
+            box-shadow: 0 18px 50px rgba(255, 209, 163, 0.17);
+        }
+
+        .secondary-link {
+            border: 1px solid var(--border-strong);
+            color: white;
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .primary-link:hover,
+        .secondary-link:hover {
+            transform: translateY(-2px);
+        }
+
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 22px 70px;
+        }
+
+        .terminal-section {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-top: 20px;
+        }
+
+        .terminal-card,
+        .flow-card,
+        .results-card {
+            border: 1px solid var(--border);
+            background: rgba(11, 11, 11, 0.72);
+            box-shadow: var(--shadow);
+            border-radius: 26px;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        .terminal-top {
+            height: 46px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .terminal-dots span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .terminal-name {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .terminal-body {
+            padding: 26px;
+        }
+
+        .section-label {
+            color: var(--accent);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .terminal-body h2,
+        .flow-card h2,
+        .results-card h2 {
+            margin: 0;
+            font-size: 30px;
+            letter-spacing: -1px;
+        }
+
+        .terminal-body p,
+        .flow-card p {
+            margin: 14px 0 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 15px;
         }
 
         .scan-form {
-            flex-direction: column;
+            margin-top: 26px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-wrap {
+            position: relative;
+            flex: 1;
+        }
+
+        .prompt {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--border-strong);
+            background: #050505;
+            color: white;
+            padding: 16px 16px 16px 38px;
+            border-radius: 14px;
+            outline: none;
+            font-family: "Lexend", Arial, sans-serif;
+            font-size: 14px;
+            transition: 0.18s ease;
+        }
+
+        input:focus {
+            border-color: rgba(255, 209, 163, 0.55);
+            box-shadow: 0 0 0 4px rgba(255, 209, 163, 0.08);
+        }
+
+        input::placeholder {
+            color: #595959;
         }
 
         button {
-            width: 100%;
+            border: none;
+            padding: 16px 20px;
+            min-width: 132px;
+            border-radius: 14px;
+            font-family: "Lexend", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            color: #0a0a0a;
+            background: var(--accent);
+            transition: 0.18s ease;
+            box-shadow: 0 18px 38px rgba(255, 209, 163, 0.15);
         }
 
-        .terminal-body,
-        .flow-card,
+        button:hover {
+            transform: translateY(-2px);
+            background: #ffdab8;
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #msg {
+            min-height: 22px;
+            color: var(--accent);
+            font-size: 14px;
+            margin: 18px 0 0;
+            font-weight: 700;
+        }
+
+        .quick-targets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .quick-targets button {
+            min-width: auto;
+            padding: 9px 13px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--muted-2);
+            border: 1px solid var(--border);
+            box-shadow: none;
+            font-size: 12px;
+        }
+
+        .quick-targets button:hover {
+            background: rgba(255, 209, 163, 0.08);
+            color: var(--accent);
+        }
+
+        .flow-card {
+            padding: 26px;
+        }
+
+        .warning {
+            margin-top: 18px;
+            border: 1px solid rgba(255, 209, 163, 0.24);
+            background: rgba(255, 209, 163, 0.07);
+            color: #ffe0bd;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .flow-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .flow-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: 15px;
+            color: var(--muted-2);
+            font-size: 14px;
+        }
+
+        .flow-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 209, 163, 0.1);
+            color: var(--accent);
+            font-weight: 900;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
         .results-card {
+            margin-top: 28px;
+            padding: 26px;
+        }
+
+        .results-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        .target-box {
+            display: inline-block;
+            margin-top: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: 14px;
+            padding: 11px 13px;
+            color: var(--muted-2);
+            word-break: break-all;
+            font-size: 14px;
+        }
+
+
+        .download-row {
+            margin-top: 14px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 14px;
+            padding: 12px 16px;
+            background: var(--accent);
+            color: #0a0a0a;
+            font-size: 13px;
+            font-weight: 900;
+            border: 1px solid rgba(255, 209, 163, 0.4);
+            box-shadow: 0 16px 34px rgba(255, 209, 163, 0.14);
+            transition: 0.18s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            background: #ffdab8;
+        }
+
+        .status {
+            display: inline-flex;
+            gap: 9px;
+            align-items: center;
+            border: 1px solid rgba(85, 243, 138, 0.25);
+            background: rgba(85, 243, 138, 0.08);
+            color: #b7ffc9;
+            padding: 10px 13px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .stat {
+            border: 1px solid var(--border);
+            background: #070707;
+            border-radius: 18px;
             padding: 20px;
         }
-    }
-</style>
-```
 
+        .stat-value {
+            font-size: 34px;
+            color: var(--accent);
+            font-weight: 900;
+            letter-spacing: -1px;
+        }
+
+        .stat-label {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .table-shell {
+            margin-top: 24px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            background: #050505;
+        }
+
+        .table-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .table-header strong {
+            color: white;
+            font-size: 15px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 960px;
+        }
+
+        th {
+            color: white;
+            text-align: left;
+            padding: 15px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            background: #0b0b0b;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            color: var(--muted-2);
+            font-size: 13px;
+            line-height: 1.5;
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: rgba(255, 209, 163, 0.035);
+        }
+
+        .severity {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 209, 163, 0.24);
+            background: rgba(255, 209, 163, 0.08);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .template-name {
+            color: white;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            margin-top: 22px;
+            border: 1px solid rgba(125, 211, 252, 0.18);
+            background: rgba(125, 211, 252, 0.055);
+            border-radius: 18px;
+            padding: 22px;
+            color: #dff6ff;
+            line-height: 1.7;
+        }
+
+        .logs {
+            margin-top: 22px;
+        }
+
+        .logs h3 {
+            margin: 0 0 10px;
+        }
+
+        pre {
+            margin: 0;
+            border: 1px solid var(--border);
+            background: #050505;
+            color: var(--muted-2);
+            border-radius: 16px;
+            padding: 16px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .footer {
+            margin-top: 34px;
+            padding: 34px 0 10px;
+            text-align: center;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .footer strong {
+            color: var(--accent);
+        }
+
+        .giant-watermark {
+            position: fixed;
+            left: 50%;
+            bottom: -50px;
+            transform: translateX(-50%);
+            font-size: clamp(90px, 16vw, 230px);
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.025);
+            pointer-events: none;
+            z-index: 0;
+            letter-spacing: -10px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 900px) {
+            .terminal-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                letter-spacing: -2px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .nav-links a:not(.nav-button) {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 60px;
+            }
+
+            .scan-form {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .terminal-body,
+            .flow-card,
+            .results-card {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -732,200 +729,195 @@
     </div>
 </nav>
 
-</nav>
-
 <div class="page">
 
-```
-<section class="hero">
-    <div class="eyebrow">
-        <span class="dot"></span>
-        Cloud Scanner · Docker · Flask · Render
-    </div>
+    <section class="hero">
+        <div class="eyebrow">
+            <span class="dot"></span>
+            Cloud Scanner · Docker · Flask · Render
+        </div>
 
-    <h1>
-        <span class="hero-title">
-            Scan web targets<br>
-            without local setup
-        </span>
-    </h1>
+        <h1>
+            <span class="hero-title">
+                Scan web targets<br>
+                without local setup
+            </span>
+        </h1>
 
-    <p>
-        Enter an authorized URL, run a lightweight Nuclei scan inside a Docker container, store JSONL results, and review findings through a clean dashboard.
-    </p>
+        <p>
+            Enter an authorized URL, run a lightweight Nuclei scan inside a Docker container, store JSONL results, and review findings through a clean dashboard.
+        </p>
 
-    <div class="hero-actions">
-        <a class="primary-link" href="#scanner">Start scanning</a>
-        <a class="secondary-link" href="#flow">View system flow</a>
-    </div>
-</section>
+        <div class="hero-actions">
+            <a class="primary-link" href="#scanner">Start scanning</a>
+            <a class="secondary-link" href="#flow">View system flow</a>
+        </div>
+    </section>
 
-<main class="main">
+    <main class="main">
 
-    <section class="terminal-section" id="scanner">
-        <div class="terminal-card">
-            <div class="terminal-top">
-                <div class="terminal-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-                <div class="terminal-name">scanner.local</div>
-                <div></div>
-            </div>
-
-            <div class="terminal-body">
-                <div class="section-label">Run scan</div>
-                <h2>Start a Scan</h2>
-                <p>
-                    Enter an authorized test website URL. For this assignment, use demo sites such as
-                    <strong>https://demoqa.com/</strong> and <strong>https://example.com</strong>.
-                </p>
-
-                <div class="quick-targets">
-                    <button type="button" onclick="fillExample('https://demoqa.com/')">https://demoqa.com/</button>
-                    <button type="button" onclick="fillExample('https://example.com')">https://example.com</button>
+        <section class="terminal-section" id="scanner">
+            <div class="terminal-card">
+                <div class="terminal-top">
+                    <div class="terminal-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <div class="terminal-name">scanner.local</div>
+                    <div></div>
                 </div>
 
-                <form class="scan-form" action="/scan" method="post" onsubmit="startScan()">
-                    <div class="input-wrap">
-                        <span class="prompt">$</span>
-                        <input id="targetInput" name="target" placeholder="https://demoqa.com/" required>
+                <div class="terminal-body">
+                    <div class="section-label">Run scan</div>
+                    <h2>Start a Scan</h2>
+                    <p>
+                        Enter an authorized test website URL. For this assignment, use demo sites such as
+                        <strong>https://demoqa.com/</strong> and <strong>https://example.com</strong>.
+                    </p>
+
+                    <div class="quick-targets">
+                        <button type="button" onclick="fillExample('https://demoqa.com/')">https://demoqa.com/</button>
+                        <button type="button" onclick="fillExample('https://example.com')">https://example.com</button>
                     </div>
 
-                    <button id="scanBtn" type="submit">Scan</button>
-                </form>
+                    <form class="scan-form" action="/scan" method="post" onsubmit="startScan()">
+                        <div class="input-wrap">
+                            <span class="prompt">$</span>
+                            <input id="targetInput" name="target" placeholder="https://demoqa.com/" required>
+                        </div>
 
-                <p id="msg"></p>
-            </div>
-        </div>
+                        <button id="scanBtn" type="submit">Scan</button>
+                    </form>
 
-        <div class="flow-card" id="flow">
-            <div class="section-label">Architecture</div>
-            <h2>System Flow</h2>
-            <p>
-                The Flask API receives the target URL, executes Nuclei in the Docker container, stores JSONL output, and displays the results.
-            </p>
-
-            <div class="warning">
-                Educational use only. Only scan authorized targets, test websites, or your own applications.
+                    <p id="msg"></p>
+                </div>
             </div>
 
-            <div class="flow-list">
-                <div class="flow-item"><span class="flow-num">1</span> User enters URL</div>
-                <div class="flow-item"><span class="flow-num">2</span> Web interface sends request</div>
-                <div class="flow-item"><span class="flow-num">3</span> Flask API runs Nuclei</div>
-                <div class="flow-item"><span class="flow-num">4</span> JSONL results are stored</div>
-                <div class="flow-item"><span class="flow-num">5</span> Dashboard displays findings</div>
-            </div>
-        </div>
-    </section>
+            <div class="flow-card" id="flow">
+                <div class="section-label">Architecture</div>
+                <h2>System Flow</h2>
+                <p>
+                    The Flask API receives the target URL, executes Nuclei in the Docker container, stores JSONL output, and displays the results.
+                </p>
 
-    {% if target %}
-    <section class="results-card" id="results">
-        <div class="results-top">
-            <div>
-                <div class="section-label">Dashboard</div>
-                <h2>Scan Results</h2>
-                <div class="target-box">
-                    <strong>Target:</strong> {{ target }}
+                <div class="warning">
+                    Educational use only. Only scan authorized targets, test websites, or your own applications.
                 </div>
 
-                {% if output_file %}
-                <div class="download-row">
-                    <a class="download-btn" href="/download/{{ output_file }}">
-                        Download JSONL Report
-                    </a>
+                <div class="flow-list">
+                    <div class="flow-item"><span class="flow-num">1</span> User enters URL</div>
+                    <div class="flow-item"><span class="flow-num">2</span> Web interface sends request</div>
+                    <div class="flow-item"><span class="flow-num">3</span> Flask API runs Nuclei</div>
+                    <div class="flow-item"><span class="flow-num">4</span> JSONL results are stored</div>
+                    <div class="flow-item"><span class="flow-num">5</span> Dashboard displays findings</div>
                 </div>
-                {% endif %}
             </div>
+        </section>
 
-            <div class="status">
-                <span class="dot"></span>
-                Scan Completed
-            </div>
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-value">{{ findings|length }}</div>
-                <div class="stat-label">Total Findings</div>
-            </div>
-
-            <div class="stat">
-                <div class="stat-value">JSONL</div>
-                <div class="stat-label">Stored Result Format</div>
-            </div>
-
-            <div class="stat">
-                <div class="stat-value">Nuclei</div>
-                <div class="stat-label">Scanner Engine</div>
-            </div>
-        </div>
-
-        {% if findings %}
-        <div class="table-shell">
-            <div class="table-header">
+        {% if target %}
+        <section class="results-card" id="results">
+            <div class="results-top">
                 <div>
-                    <strong>Security Findings</strong><br>
-                    Rendered from JSONL scan output
+                    <div class="section-label">Dashboard</div>
+                    <h2>Scan Results</h2>
+                    <div class="target-box">
+                        <strong>Target:</strong> {{ target }}
+                    </div>
+
+                    {% if output_file %}
+                    <div class="download-row">
+                        <a class="download-btn" href="/download/{{ output_file }}">
+                            Download JSONL Report
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
-                <div>Lightweight Nuclei template results</div>
+
+                <div class="status">
+                    <span class="dot"></span>
+                    Scan Completed
+                </div>
             </div>
 
-            <div class="table-wrap">
-                <table>
-                    <tr>
-                        <th>Severity</th>
-                        <th>Template</th>
-                        <th>Missing Header</th>
-                        <th>URL</th>
-                        <th>Description</th>
-                    </tr>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">{{ findings|length }}</div>
+                    <div class="stat-label">Total Findings</div>
+                </div>
 
-                    {% for f in findings %}
-                    <tr>
-                        <td>
-                            <span class="severity">
-                                {{ f.get("info", {}).get("severity", "info") }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="template-name">
-                                {{ f.get("info", {}).get("name", "") }}
-                            </div>
-                        </td>
-                        <td>{{ f.get("matcher-name", "") }}</td>
-                        <td>{{ f.get("matched-at", "") }}</td>
-                        <td>{{ f.get("info", {}).get("description", "") }}</td>
-                    </tr>
-                    {% endfor %}
-                </table>
+                <div class="stat">
+                    <div class="stat-value">JSONL</div>
+                    <div class="stat-label">Stored Result Format</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-value">Nuclei</div>
+                    <div class="stat-label">Scanner Engine</div>
+                </div>
             </div>
-        </div>
-        {% else %}
-        <div class="empty-state">
-            <strong>No missing security headers found.</strong><br>
-            The scan completed successfully, but this lightweight template did not return findings for the selected target.
-        </div>
+
+            {% if findings %}
+            <div class="table-shell">
+                <div class="table-header">
+                    <div>
+                        <strong>Security Findings</strong><br>
+                        Rendered from JSONL scan output
+                    </div>
+                    <div>Lightweight Nuclei template results</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Template</th>
+                            <th>Missing Header</th>
+                            <th>URL</th>
+                            <th>Description</th>
+                        </tr>
+
+                        {% for f in findings %}
+                        <tr>
+                            <td>
+                                <span class="severity">
+                                    {{ f.get("info", {}).get("severity", "info") }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="template-name">
+                                    {{ f.get("info", {}).get("name", "") }}
+                                </div>
+                            </td>
+                            <td>{{ f.get("matcher-name", "") }}</td>
+                            <td>{{ f.get("matched-at", "") }}</td>
+                            <td>{{ f.get("info", {}).get("description", "") }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <strong>No missing security headers found.</strong><br>
+                The scan completed successfully, but this lightweight template did not return findings for the selected target.
+            </div>
+            {% endif %}
+
+            {% if stderr %}
+            <div class="logs">
+                <h3>Nuclei Messages</h3>
+                <pre>{{ stderr }}</pre>
+            </div>
+            {% endif %}
+        </section>
         {% endif %}
 
-        {% if stderr %}
-        <div class="logs">
-            <h3>Nuclei Messages</h3>
-            <pre>{{ stderr }}</pre>
+        <div class="footer">
+            <strong>Architecture:</strong> User → Web Interface → Flask API → Nuclei Scanner → JSONL Results → Dashboard
         </div>
-        {% endif %}
-    </section>
-    {% endif %}
 
-    <div class="footer">
-        <strong>Architecture:</strong> User → Web Interface → Flask API → Nuclei Scanner → JSONL Results → Dashboard
-    </div>
-
-</main>
-```
-
+    </main>
 </div>
 
 <script>
@@ -933,8 +925,8 @@
         const msg = document.getElementById("msg");
         const button = document.getElementById("scanBtn");
 
-        msg.innerHTML = "Scanning please wait. Render Free may take a little time.";
-        button.innerHTML = "Scanning";
+        msg.innerHTML = "Scanning... please wait. Render Free may take a little time.";
+        button.innerHTML = "Scanning...";
         button.disabled = true;
     }
 
