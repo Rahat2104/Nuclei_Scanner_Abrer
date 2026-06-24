@@ -1029,9 +1029,9 @@
                         {% for f in findings %}
                         <tr>
                             <td>
-                                <span class="severity">
-                                    {{ f.get("info", {}).get("severity", "info") }}
-                                </span>
+                                <span class="severity severity-{{ f.get('display_severity', 'info') }}">
+    {{ f.get("display_severity", "info") }}
+</span>
                             </td>
                             <td>
                                 <div class="template-name">
