@@ -545,6 +545,28 @@ def download_result(filename):
     safe_filename = secure_filename(filename)
     return send_from_directory(RESULTS_DIR, safe_filename, as_attachment=True)
 
+@app.route("/pdf/<filename>")
+def download_pdf_report(filename):
+    safe_filename = secure_filename(filename)
+    file_path = os.path.join(RESULTS_DIR, safe_filename)
+
+    if not os.path.exists(file_path):
+        return "PDF report could not be generated because the JSONL result file was not found.", 404
+
+    target = request.args.get("target", "Unknown target")
+
+    findings = read_findings_for_pdf(file_path)
+    severity_data = build_severity_data(findings)
+
+    pdf_buffer = generate_pdf_report(target, findings, severity_data)
+
+    pdf_filename = safe_filename.replace(".jsonl", ".pdf")
+
+    response = make_response(pdf_buffer.getvalue())
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={pdf_filename}"
+
+    return response
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
