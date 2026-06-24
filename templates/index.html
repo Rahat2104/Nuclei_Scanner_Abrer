@@ -1044,7 +1044,12 @@
                         <tr>
                             <td>
                                 <span class="severity severity-{{ f.get('display_severity', 'info') }}">
-                                    {{ f.get("display_severity", "info") }}
+                                    {% set severity_label = f.get("display_severity", "info") %}
+                                    {% if severity_label == "info" %}
+                                        Advisory
+                                    {% else %}
+                                        {{ severity_label }}
+                                    {% endif %}
                                 </span>
                             </td>
                             <td>
