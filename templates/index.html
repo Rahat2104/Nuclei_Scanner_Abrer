@@ -1001,7 +1001,11 @@
                 <div class="severity-row">
                     <div class="severity-name">
                         <span class="severity-dot-small severity-dot-{{ item.level }}"></span>
-                        {{ item.level }}
+                        {% if item.level == "info" %}
+                            Advisory
+                        {% else %}
+                            {{ item.level }}
+                        {% endif %}
                     </div>
 
                     <div class="severity-bar">
