@@ -334,6 +334,138 @@ def add_scan_history(target, output_file, findings, severity_data):
     return history
     
 @app.route("/")
+def read_findings_for_pdf(file_path):
+    findings = []
+
+    if not os.path.exists(file_path):
+        return findings
+
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            if line.strip():
+                try:
+                    finding = json.loads(line)
+
+                    display_severity = classify_severity(finding)
+                    finding["display_severity"] = display_severity
+
+                    ai_explanation = generate_ai_explanation(finding)
+                    finding["ai_explanation"] = ai_explanation
+
+                    findings.append(finding)
+
+                except json.JSONDecodeError:
+                    pass
+
+    return findings
+
+
+def safe_pdf_text(value):
+    if value is None:
+        return ""
+
+    return escape(str(value))
+
+
+def severity_display_name(level):
+    if level == "info":
+        return "Advisory"
+
+    return str(level).capitalize()
+
+
+def generate_pdf_report(target, findings, severity_data):
+    buffer = BytesIO()
+
+    document = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=40,
+        leftMargin=40,
+        topMargin=40,
+        bottomMargin=40
+    )
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "CustomTitle",
+        parent=styles["Title"],
+        fontSize=22,
+        leading=28,
+        spaceAfter=18
+    )
+
+    heading_style = ParagraphStyle(
+        "CustomHeading",
+        parent=styles["Heading2"],
+        fontSize=14,
+        leading=18,
+        spaceBefore=14,
+        spaceAfter=8
+    )
+
+    normal_style = ParagraphStyle(
+        "CustomNormal",
+        parent=styles["BodyText"],
+        fontSize=10,
+        leading=14,
+        spaceAfter=8
+    )
+
+    small_style = ParagraphStyle(
+        "CustomSmall",
+        parent=styles["BodyText"],
+        fontSize=9,
+        leading=12,
+        spaceAfter=6
+    )
+
+    story = []
+
+    story.append(Paragraph("Nuclei Security Scan Report", title_style))
+    story.append(Paragraph(f"<b>Target:</b> {safe_pdf_text(target)}", normal_style))
+    story.append(Paragraph(f"<b>Total Findings:</b> {len(findings)}", normal_style))
+    story.append(Spacer(1, 10))
+
+    story.append(Paragraph("Severity Summary", heading_style))
+
+    for item in severity_data:
+        level = item.get("level", "info")
+        count = item.get("count", 0)
+        label = severity_display_name(level)
+        story.append(Paragraph(f"<b>{label}:</b> {count}", normal_style))
+
+    story.append(Spacer(1, 12))
+    story.append(Paragraph("Findings and AI-Style Explanations", heading_style))
+
+    if not findings:
+        story.append(Paragraph("No findings were detected for this target.", normal_style))
+    else:
+        for index, finding in enumerate(findings, start=1):
+            severity = severity_display_name(finding.get("display_severity", "info"))
+            template_name = finding.get("info", {}).get("name", "Security Finding")
+            missing_header = finding.get("matcher-name", "N/A")
+            matched_url = finding.get("matched-at", target)
+            explanation = finding.get("ai_explanation", "No explanation available.")
+
+            story.append(Paragraph(f"Finding {index}: {safe_pdf_text(template_name)}", heading_style))
+            story.append(Paragraph(f"<b>Severity:</b> {safe_pdf_text(severity)}", small_style))
+            story.append(Paragraph(f"<b>Detected Item:</b> {safe_pdf_text(missing_header)}", small_style))
+            story.append(Paragraph(f"<b>URL:</b> {safe_pdf_text(matched_url)}", small_style))
+            story.append(Paragraph(f"<b>Explanation:</b> {safe_pdf_text(explanation)}", small_style))
+            story.append(Spacer(1, 8))
+
+    story.append(Spacer(1, 14))
+    story.append(Paragraph(
+        "Educational use only. This report is generated from Nuclei scan results and should be reviewed before applying security changes.",
+        small_style
+    ))
+
+    document.build(story)
+
+    buffer.seek(0)
+    return buffer
 def home():
     return render_template(
         "index.html",
