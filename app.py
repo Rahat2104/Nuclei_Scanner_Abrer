@@ -36,7 +36,6 @@ def classify_severity(finding):
         finding.get("info", {}).get("severity", "info")
     )
 
-    # Trust Nuclei if it already provides useful severity.
     if native_severity in ["critical", "high", "medium", "low"]:
         return native_severity
 
@@ -158,7 +157,6 @@ def classify_severity(finding):
         if keyword in text:
             return "info"
 
-    # Final backup: never blank
     return native_severity or "info"
 
 
@@ -194,6 +192,94 @@ def build_severity_data(findings):
         })
 
     return severity_data
+
+
+def generate_ai_explanation(finding):
+    """
+    Local AI-style explanation generator.
+    It explains each finding in simple language without requiring an external API key.
+    """
+
+    header = finding.get("matcher-name", "").lower().strip()
+    severity = finding.get("display_severity", "info")
+    template_name = finding.get("info", {}).get("name", "Security finding")
+    description = finding.get("info", {}).get("description", "")
+
+    explanations = {
+        "strict-transport-security": {
+            "meaning": "The website is missing the Strict-Transport-Security header. This header tells browsers to only use HTTPS when connecting to the site.",
+            "risk": "Without it, users may be more exposed to protocol downgrade attacks or insecure HTTP connections.",
+            "fix": "Add the Strict-Transport-Security header with a safe max-age value after confirming HTTPS works correctly across the site."
+        },
+        "content-security-policy": {
+            "meaning": "The website is missing a Content-Security-Policy header. CSP helps control which scripts, styles, images, and resources the browser is allowed to load.",
+            "risk": "Without CSP, the site may have weaker protection against cross-site scripting and content injection attacks.",
+            "fix": "Create a Content-Security-Policy that only allows trusted sources for scripts, styles, images, frames, and connections."
+        },
+        "x-frame-options": {
+            "meaning": "The website is missing the X-Frame-Options header. This header helps prevent the page from being embedded inside a malicious frame.",
+            "risk": "Without it, the site may be more exposed to clickjacking attacks.",
+            "fix": "Add X-Frame-Options with DENY or SAMEORIGIN, or use the frame-ancestors directive in Content-Security-Policy."
+        },
+        "x-content-type-options": {
+            "meaning": "The website is missing the X-Content-Type-Options header. This header prevents browsers from guessing file types incorrectly.",
+            "risk": "Without it, browsers may perform MIME sniffing, which can increase the risk of unwanted script execution in some cases.",
+            "fix": "Add X-Content-Type-Options with the value nosniff."
+        },
+        "referrer-policy": {
+            "meaning": "The website is missing the Referrer-Policy header. This header controls how much referrer information is shared when users click links.",
+            "risk": "Without it, sensitive URL information may be leaked to third-party websites.",
+            "fix": "Add a Referrer-Policy such as strict-origin-when-cross-origin or no-referrer depending on the application requirement."
+        },
+        "permissions-policy": {
+            "meaning": "The website is missing the Permissions-Policy header. This header controls access to browser features such as camera, microphone, geolocation, and sensors.",
+            "risk": "Without it, the browser may allow more features than the site actually needs.",
+            "fix": "Add a Permissions-Policy header and disable browser features that are not required."
+        },
+        "cross-origin-opener-policy": {
+            "meaning": "The website is missing the Cross-Origin-Opener-Policy header. This header helps isolate browsing contexts between different origins.",
+            "risk": "Without it, the site may have weaker protection against cross-origin interaction risks.",
+            "fix": "Add Cross-Origin-Opener-Policy with a value such as same-origin if compatible with the application."
+        },
+        "cross-origin-resource-policy": {
+            "meaning": "The website is missing the Cross-Origin-Resource-Policy header. This header controls whether other origins can load the site's resources.",
+            "risk": "Without it, resources may be more easily shared or embedded across origins.",
+            "fix": "Add Cross-Origin-Resource-Policy with a suitable value such as same-origin, same-site, or cross-origin depending on the use case."
+        },
+        "cross-origin-embedder-policy": {
+            "meaning": "The website is missing the Cross-Origin-Embedder-Policy header. This header helps control how cross-origin resources are embedded.",
+            "risk": "Without it, the site may not benefit from stronger browser isolation features.",
+            "fix": "Add Cross-Origin-Embedder-Policy after confirming that required third-party resources still load correctly."
+        },
+        "x-permitted-cross-domain-policies": {
+            "meaning": "The website is missing the X-Permitted-Cross-Domain-Policies header. This header controls how Adobe products handle cross-domain policy files.",
+            "risk": "Without it, old clients may allow cross-domain data access in ways the site owner did not intend.",
+            "fix": "Add X-Permitted-Cross-Domain-Policies with a restrictive value such as none."
+        }
+    }
+
+    if header in explanations:
+        item = explanations[header]
+        return (
+            f"{item['meaning']} "
+            f"Risk level: {severity.upper()}. "
+            f"{item['risk']} "
+            f"Recommended fix: {item['fix']}"
+        )
+
+    if header:
+        return (
+            f"This finding is related to {header}. "
+            f"Risk level: {severity.upper()}. "
+            f"Nuclei detected this as part of the scan result. "
+            f"Review the finding details and apply the recommended security configuration for this item."
+        )
+
+    return (
+        f"This result was detected by the template '{template_name}'. "
+        f"Risk level: {severity.upper()}. "
+        f"{description if description else 'Review the finding and confirm whether it affects the target application.'}"
+    )
 
 
 @app.route("/")
@@ -240,6 +326,9 @@ def scan():
 
                         display_severity = classify_severity(finding)
                         finding["display_severity"] = display_severity
+
+                        ai_explanation = generate_ai_explanation(finding)
+                        finding["ai_explanation"] = ai_explanation
 
                         findings.append(finding)
 
