@@ -1,9 +1,9 @@
-from flask import Flask, request, render_template, send_from_directory
-import subprocess
-import os
-import time
-import json
-from werkzeug.utils import secure_filename
+from io import BytesIO
+from flask import Flask, request, render_template, send_from_directory, make_response
+from xml.sax.saxutils import escape
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 app = Flask(__name__)
 
