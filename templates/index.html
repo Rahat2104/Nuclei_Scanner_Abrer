@@ -1081,7 +1081,12 @@
                             </td>
                             <td>{{ f.get("matcher-name", "") }}</td>
                             <td>{{ f.get("matched-at", "") }}</td>
-                            <td>{{ f.get("info", {}).get("description", "") }}</td>
+                            <td>
+                                <div class="ai-explanation">
+                                    <span class="ai-tag">AI Explanation</span><br>
+                                    {{ f.get("ai_explanation", "No explanation available.") }}
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </table>
