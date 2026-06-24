@@ -189,7 +189,9 @@
     <div class="card">
         <h2>Scan Report</h2>
         <p><strong>Target:</strong> {{ target }}</p>
-        <p><strong>Total Findings:</strong> {{ total_findings }}</p>
+        {% if command_display %}
+    <p><strong>Command Executed:</strong> {{ command_display }}</p>
+{% endif %}
 
         {% if filename %}
             <a class="report-btn" href="/reports/{{ filename }}">Download JSON Report</a>
