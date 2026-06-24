@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_from_directory, make_response
+from flask import Flask, request, render_template, send_from_directory, make_response, redirect, url_for, session
 import subprocess
 import os
 import time
@@ -6,6 +6,7 @@ import json
 from io import BytesIO
 from xml.sax.saxutils import escape
 from urllib.parse import urlparse
+from functools import wraps
 from werkzeug.utils import secure_filename
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
@@ -13,9 +14,23 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 app = Flask(__name__)
 
+app.secret_key = os.environ.get("SECRET_KEY", "demo-secret-key-change-later")
+
+APP_USERNAME = os.environ.get("APP_USERNAME", "admin")
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "nuclei123")
+
 RESULTS_DIR = "results"
 HISTORY_FILE = os.path.join(RESULTS_DIR, "scan_history.json")
 MAX_HISTORY = 20
+
+
+def login_required(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect(url_for("login"))
+        return function(*args, **kwargs)
+    return wrapper
 
 
 def valid_url(url):
@@ -52,96 +67,41 @@ def classify_severity(finding):
     text = f"{matcher_name} {template_id} {template_name} {description}".lower()
 
     critical_keywords = [
-        "remote code execution",
-        "rce",
-        "command injection",
-        "sql injection",
-        "sqli",
-        "authentication bypass",
-        "unauthenticated admin",
-        "default admin credential",
-        "critical"
+        "remote code execution", "rce", "command injection", "sql injection",
+        "sqli", "authentication bypass", "unauthenticated admin",
+        "default admin credential", "critical"
     ]
 
     high_keywords = [
-        "strict-transport-security",
-        "hsts",
-        "content-security-policy",
-        "csp",
-        "frame-ancestors",
-        "cors misconfiguration",
-        "wildcard cors",
-        "open cors",
-        "access-control-allow-origin: *",
-        "exposed secret",
-        "api key",
-        "private key",
-        "password disclosure",
-        "token disclosure",
-        "directory traversal",
-        "path traversal",
-        "server-side request forgery",
-        "ssrf",
-        "high"
+        "strict-transport-security", "hsts", "content-security-policy", "csp",
+        "frame-ancestors", "cors misconfiguration", "wildcard cors", "open cors",
+        "access-control-allow-origin: *", "exposed secret", "api key",
+        "private key", "password disclosure", "token disclosure",
+        "directory traversal", "path traversal", "server-side request forgery",
+        "ssrf", "high"
     ]
 
     medium_keywords = [
-        "x-frame-options",
-        "x-content-type-options",
-        "referrer-policy",
-        "permissions-policy",
-        "feature-policy",
-        "cross-origin-opener-policy",
-        "cross-origin-resource-policy",
-        "cross-origin-embedder-policy",
-        "x-permitted-cross-domain-policies",
-        "clear-site-data",
-        "origin-agent-cluster",
-        "clickjacking",
-        "mime sniffing",
-        "missing security header",
-        "open redirect",
-        "directory listing",
-        "medium"
+        "x-frame-options", "x-content-type-options", "referrer-policy",
+        "permissions-policy", "feature-policy", "cross-origin-opener-policy",
+        "cross-origin-resource-policy", "cross-origin-embedder-policy",
+        "x-permitted-cross-domain-policies", "clear-site-data",
+        "origin-agent-cluster", "clickjacking", "mime sniffing",
+        "missing security header", "open redirect", "directory listing", "medium"
     ]
 
     low_keywords = [
-        "x-xss-protection",
-        "x-download-options",
-        "x-dns-prefetch-control",
-        "expect-ct",
-        "nel",
-        "report-to",
-        "reporting-endpoints",
-        "server",
-        "x-powered-by",
-        "x-aspnet-version",
-        "x-aspnetmvc-version",
-        "powered-by",
-        "technology disclosure",
-        "information disclosure",
-        "cache-control",
-        "pragma",
-        "expires",
-        "low"
+        "x-xss-protection", "x-download-options", "x-dns-prefetch-control",
+        "expect-ct", "nel", "report-to", "reporting-endpoints", "server",
+        "x-powered-by", "x-aspnet-version", "x-aspnetmvc-version", "powered-by",
+        "technology disclosure", "information disclosure", "cache-control",
+        "pragma", "expires", "low"
     ]
 
     info_keywords = [
-        "robots.txt",
-        "sitemap.xml",
-        "favicon",
-        "waf detect",
-        "cdn detect",
-        "technology detect",
-        "http title",
-        "tls",
-        "ssl",
-        "whois",
-        "dns",
-        "fingerprint",
-        "info",
-        "website response check",
-        "security.txt"
+        "robots.txt", "sitemap.xml", "favicon", "waf detect", "cdn detect",
+        "technology detect", "http title", "tls", "ssl", "whois", "dns",
+        "fingerprint", "info", "website response check", "security.txt"
     ]
 
     for keyword in critical_keywords:
@@ -467,15 +427,45 @@ def generate_pdf_report(target, findings, severity_data):
     return buffer
 
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if session.get("logged_in"):
+        return redirect(url_for("home"))
+
+    error = None
+
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+
+        if username == APP_USERNAME and password == APP_PASSWORD:
+            session["logged_in"] = True
+            session["username"] = username
+            return redirect(url_for("home"))
+
+        error = "Invalid username or password."
+
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
 @app.route("/")
+@login_required
 def home():
     return render_template(
         "index.html",
-        scan_history=load_scan_history()
+        scan_history=load_scan_history(),
+        username=session.get("username", "admin")
     )
 
 
 @app.route("/scan", methods=["POST"])
+@login_required
 def scan():
     target = request.form.get("target", "").strip()
 
@@ -483,6 +473,7 @@ def scan():
         return render_template(
             "index.html",
             scan_history=load_scan_history(),
+            username=session.get("username", "admin"),
             error="Please enter a valid URL starting with http:// or https://"
         )
 
@@ -529,6 +520,7 @@ def scan():
         return render_template(
             "index.html",
             scan_history=load_scan_history(),
+            username=session.get("username", "admin"),
             error="The scan timed out. Try a smaller or faster target."
         )
 
@@ -536,6 +528,7 @@ def scan():
         return render_template(
             "index.html",
             scan_history=load_scan_history(),
+            username=session.get("username", "admin"),
             error=f"Scan error: {str(e)}"
         )
 
@@ -550,17 +543,20 @@ def scan():
         stderr=scan_result.stderr,
         output_file=output_filename,
         severity_data=severity_data,
-        scan_history=scan_history
+        scan_history=scan_history,
+        username=session.get("username", "admin")
     )
 
 
 @app.route("/download/<filename>")
+@login_required
 def download_result(filename):
     safe_filename = secure_filename(filename)
     return send_from_directory(RESULTS_DIR, safe_filename, as_attachment=True)
 
 
 @app.route("/pdf/<filename>")
+@login_required
 def download_pdf_report(filename):
     safe_filename = secure_filename(filename)
     file_path = os.path.join(RESULTS_DIR, safe_filename)
