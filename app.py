@@ -300,11 +300,11 @@ def scan():
     "nuclei",
     "-u", target,
 
-    # Default lightweight template from Nuclei
     "-t", "/root/nuclei-templates/http/misconfiguration/http-missing-security-headers.yaml",
 
-    # My additional custom lightweight template
     "-t", "scanner-templates/basic-http-check.yaml",
+
+    "-t", "scanner-templates/security-txt-check.yaml",
 
     "-jsonl",
     "-o", output,
