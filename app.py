@@ -297,18 +297,24 @@ def scan():
     output = os.path.join(RESULTS_DIR, output_filename)
 
     cmd = [
-        "nuclei",
-        "-u", target,
-        "-t", "/root/nuclei-templates/http/misconfiguration/http-missing-security-headers.yaml",
-        "-jsonl",
-        "-o", output,
-        "-c", "1",
-        "-rl", "1",
-        "-timeout", "10",
-        "-retries", "0",
-        "-silent",
-        "-duc"
-    ]
+    "nuclei",
+    "-u", target,
+
+    # Default lightweight template from Nuclei
+    "-t", "/root/nuclei-templates/http/misconfiguration/http-missing-security-headers.yaml",
+
+    # My additional custom lightweight template
+    "-t", "scanner-templates/basic-http-check.yaml",
+
+    "-jsonl",
+    "-o", output,
+    "-c", "1",
+    "-rl", "1",
+    "-timeout", "10",
+    "-retries", "0",
+    "-silent",
+    "-duc"
+]
 
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=40)
