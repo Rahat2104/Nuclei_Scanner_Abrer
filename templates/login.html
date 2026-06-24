@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | NucleiScan</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #030303;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --text: #f5f5f5;
+            --muted: #9ca3af;
+            --accent: #ffd1a3;
+            --green: #55f38a;
+            --danger: #ff6b6b;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Lexend", Arial, Helvetica, sans-serif;
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at 50% 0%, rgba(255, 209, 163, 0.14), transparent 34%),
+                radial-gradient(circle at 80% 35%, rgba(125, 211, 252, 0.08), transparent 28%),
+                radial-gradient(circle at 20% 70%, rgba(85, 243, 138, 0.06), transparent 30%),
+                #030303;
+            overflow: hidden;
+        }
+
+        .grid {
+            position: fixed;
+            inset: 0;
+            opacity: 0.035;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px);
+            background-size: 80px 80px;
+            pointer-events: none;
+        }
+
+        .watermark {
+            position: fixed;
+            left: 50%;
+            bottom: -50px;
+            transform: translateX(-50%);
+            font-size: clamp(90px, 16vw, 220px);
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.025);
+            pointer-events: none;
+            letter-spacing: -10px;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 2;
+            width: min(92vw, 440px);
+            border: 1px solid var(--border);
+            background: rgba(11, 11, 11, 0.76);
+            border-radius: 28px;
+            padding: 34px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(18px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 34px;
+        }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255, 209, 163, 1), rgba(255, 184, 107, 0.75));
+            display: grid;
+            place-items: center;
+            color: #000;
+            font-weight: 900;
+            box-shadow: 0 0 32px rgba(255, 209, 163, 0.22);
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 209, 163, 0.18);
+            background: rgba(255, 209, 163, 0.08);
+            color: #ffe0bd;
+            border-radius: 999px;
+            font-size: 12px;
+            margin-bottom: 18px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 18px rgba(85, 243, 138, 0.8);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 38px;
+            line-height: 1;
+            letter-spacing: -2px;
+        }
+
+        p {
+            margin: 14px 0 28px;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        label {
+            display: block;
+            color: #d6d6d6;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            border: 1px solid var(--border-strong);
+            background: #050505;
+            color: white;
+            padding: 15px;
+            border-radius: 14px;
+            outline: none;
+            font-family: "Lexend", Arial, sans-serif;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        input:focus {
+            border-color: rgba(255, 209, 163, 0.55);
+            box-shadow: 0 0 0 4px rgba(255, 209, 163, 0.08);
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            padding: 15px;
+            border-radius: 14px;
+            font-family: "Lexend", Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            color: #0a0a0a;
+            background: var(--accent);
+            transition: 0.18s ease;
+            box-shadow: 0 18px 38px rgba(255, 209, 163, 0.15);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background: #ffdab8;
+        }
+
+        .error {
+            border: 1px solid rgba(255, 107, 107, 0.28);
+            background: rgba(255, 107, 107, 0.08);
+            color: #ffc6c6;
+            border-radius: 14px;
+            padding: 12px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .hint {
+            margin-top: 18px;
+            color: #777;
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .hint strong {
+            color: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+<div class="grid"></div>
+<div class="watermark">secure</div>
+
+<div class="login-card">
+    <div class="brand">
+        <div class="brand-mark">N</div>
+        <div class="brand-name">NucleiScan</div>
+    </div>
+
+    <div class="eyebrow">
+        <span class="dot"></span>
+        Protected Scanner Dashboard
+    </div>
+
+    <h1>Sign in</h1>
+    <p>Access the cloud-based vulnerability scanner, scan history, JSONL reports, and PDF reports.</p>
+
+    {% if error %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/login">
+        <label>Username</label>
+        <input name="username" placeholder="Enter username" required>
+
+        <label>Password</label>
+        <input name="password" type="password" placeholder="Enter password" required>
+
+        <button type="submit">Access Dashboard</button>
+    </form>
+
+    <div class="hint">
+        Demo login: <strong>admin</strong> / <strong>nuclei123</strong><br>
+        You can change these using Render environment variables.
+    </div>
+</div>
+</body>
+</html>
