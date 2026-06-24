@@ -8,6 +8,8 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 RESULTS_DIR = "results"
+HISTORY_FILE = os.path.join(RESULTS_DIR, "scan_history.json")
+MAX_HISTORY = 30
 
 
 def normalize_severity(value):
