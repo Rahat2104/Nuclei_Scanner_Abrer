@@ -38,6 +38,7 @@
 
         body {
             margin: 0;
+            padding: 0;
             font-family: "Lexend", Arial, Helvetica, sans-serif;
             background:
                 radial-gradient(circle at 50% 0%, rgba(255, 209, 163, 0.11), transparent 34%),
@@ -46,6 +47,7 @@
                 #030303;
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .noise {
@@ -58,6 +60,21 @@
                 linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px);
             background-size: 80px 80px;
             mask-image: linear-gradient(to bottom, black, transparent 85%);
+            z-index: 0;
+        }
+
+        .giant-watermark {
+            position: fixed;
+            left: 50%;
+            bottom: -50px;
+            transform: translateX(-50%);
+            font-size: clamp(90px, 16vw, 230px);
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.025);
+            pointer-events: none;
+            z-index: 0;
+            letter-spacing: -10px;
+            white-space: nowrap;
         }
 
         .nav {
@@ -471,7 +488,6 @@
             font-size: 14px;
         }
 
-
         .download-row {
             margin-top: 14px;
         }
@@ -537,174 +553,7 @@
             font-size: 13px;
         }
 
-        .table-shell {
-            margin-top: 24px;
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            overflow: hidden;
-            background: #050505;
-        }
-
-        .table-header {
-            padding: 16px 18px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .table-header strong {
-            color: white;
-            font-size: 15px;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 960px;
-        }
-
-        th {
-            color: white;
-            text-align: left;
-            padding: 15px 16px;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
-            background: #0b0b0b;
-        }
-
-        td {
-            padding: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-            color: var(--muted-2);
-            font-size: 13px;
-            line-height: 1.5;
-            vertical-align: top;
-        }
-
-        tr:hover td {
-            background: rgba(255, 209, 163, 0.035);
-        }
-
-        .severity {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 209, 163, 0.24);
-            background: rgba(255, 209, 163, 0.08);
-            color: var(--accent);
-            font-size: 11px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .template-name {
-            color: white;
-            font-weight: 700;
-        }
-
-        .empty-state {
-            margin-top: 22px;
-            border: 1px solid rgba(125, 211, 252, 0.18);
-            background: rgba(125, 211, 252, 0.055);
-            border-radius: 18px;
-            padding: 22px;
-            color: #dff6ff;
-            line-height: 1.7;
-        }
-
-        .logs {
-            margin-top: 22px;
-        }
-
-        .logs h3 {
-            margin: 0 0 10px;
-        }
-
-        pre {
-            margin: 0;
-            border: 1px solid var(--border);
-            background: #050505;
-            color: var(--muted-2);
-            border-radius: 16px;
-            padding: 16px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            line-height: 1.6;
-        }
-
-        .footer {
-            margin-top: 34px;
-            padding: 34px 0 10px;
-            text-align: center;
-            color: #777;
-            font-size: 13px;
-        }
-
-        .footer strong {
-            color: var(--accent);
-        }
-
-        .giant-watermark {
-            position: fixed;
-            left: 50%;
-            bottom: -50px;
-            transform: translateX(-50%);
-            font-size: clamp(90px, 16vw, 230px);
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.025);
-            pointer-events: none;
-            z-index: 0;
-            letter-spacing: -10px;
-            white-space: nowrap;
-        }
-
-        @media (max-width: 900px) {
-            .terminal-section {
-                grid-template-columns: 1fr;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                letter-spacing: -2px;
-            }
-        }
-
-        @media (max-width: 650px) {
-            .nav-links a:not(.nav-button) {
-                display: none;
-            }
-
-            .hero {
-                padding-top: 60px;
-            }
-
-            .scan-form {
-                flex-direction: column;
-            }
-
-            button {
-                width: 100%;
-            }
-
-            .terminal-body,
-            .flow-card,
-            .results-card {
-                padding: 20px;
-            }
-                    .severity-chart {
+        .severity-chart {
             margin-top: 24px;
             border: 1px solid var(--border);
             background: #070707;
@@ -828,12 +677,174 @@
         .severity-fill-info {
             background: #7dd3fc;
         }
+
+        .table-shell {
+            margin-top: 24px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            background: #050505;
+        }
+
+        .table-header {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .table-header strong {
+            color: white;
+            font-size: 15px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 960px;
+        }
+
+        th {
+            color: white;
+            text-align: left;
+            padding: 15px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            background: #0b0b0b;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            color: var(--muted-2);
+            font-size: 13px;
+            line-height: 1.5;
+            vertical-align: top;
+        }
+
+        tr:hover td {
+            background: rgba(255, 209, 163, 0.035);
+        }
+
+        .severity {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 209, 163, 0.24);
+            background: rgba(255, 209, 163, 0.08);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .template-name {
+            color: white;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            margin-top: 22px;
+            border: 1px solid rgba(125, 211, 252, 0.18);
+            background: rgba(125, 211, 252, 0.055);
+            border-radius: 18px;
+            padding: 22px;
+            color: #dff6ff;
+            line-height: 1.7;
+        }
+
+        .logs {
+            margin-top: 22px;
+        }
+
+        .logs h3 {
+            margin: 0 0 10px;
+        }
+
+        pre {
+            margin: 0;
+            border: 1px solid var(--border);
+            background: #050505;
+            color: var(--muted-2);
+            border-radius: 16px;
+            padding: 16px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .footer {
+            margin-top: 34px;
+            padding: 34px 0 10px;
+            text-align: center;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .footer strong {
+            color: var(--accent);
+        }
+
+        @media (max-width: 900px) {
+            .terminal-section {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                letter-spacing: -2px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .nav-links a:not(.nav-button) {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 60px;
+            }
+
+            .scan-form {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .terminal-body,
+            .flow-card,
+            .results-card {
+                padding: 20px;
+            }
+
+            .severity-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .severity-count {
+                text-align: left;
+            }
         }
     </style>
 </head>
 
 <body>
-
 <div class="noise"></div>
 <div class="giant-watermark">nuclei</div>
 
@@ -854,7 +865,6 @@
 </nav>
 
 <div class="page">
-
     <section class="hero">
         <div class="eyebrow">
             <span class="dot"></span>
@@ -879,7 +889,6 @@
     </section>
 
     <main class="main">
-
         <section class="terminal-section" id="scanner">
             <div class="terminal-card">
                 <div class="terminal-top">
@@ -980,7 +989,8 @@
                     <div class="stat-label">Scanner Engine</div>
                 </div>
             </div>
-                        {% if severity_data %}
+
+            {% if severity_data %}
             <div class="severity-chart">
                 <div class="severity-chart-title">
                     <h3>Severity Overview</h3>
@@ -1030,8 +1040,8 @@
                         <tr>
                             <td>
                                 <span class="severity severity-{{ f.get('display_severity', 'info') }}">
-    {{ f.get("display_severity", "info") }}
-</span>
+                                    {{ f.get("display_severity", "info") }}
+                                </span>
                             </td>
                             <td>
                                 <div class="template-name">
@@ -1065,7 +1075,6 @@
         <div class="footer">
             <strong>Architecture:</strong> User → Web Interface → Flask API → Nuclei Scanner → JSONL Results → Dashboard
         </div>
-
     </main>
 </div>
 
@@ -1085,6 +1094,5 @@
         input.focus();
     }
 </script>
-
 </body>
 </html>
