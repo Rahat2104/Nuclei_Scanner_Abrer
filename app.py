@@ -403,7 +403,8 @@ def scan():
         findings=findings,
         stderr=r.stderr,
         output_file=output_filename,
-        severity_data=severity_data
+        severity_data=severity_data,
+        scan_history=scan_history
     )
 
 
