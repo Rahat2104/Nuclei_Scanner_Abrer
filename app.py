@@ -9,40 +9,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 
 RESULTS_DIR = "results"
-TEMPLATE_DIR = "scanner-templates"
-TEMPLATE_FILE = os.path.join(TEMPLATE_DIR, "basic-http-check.yaml")
-
 os.makedirs(RESULTS_DIR, exist_ok=True)
-os.makedirs(TEMPLATE_DIR, exist_ok=True)
-
-
-def create_basic_template():
-    template_content = """id: basic-http-check
-
-info:
-  name: Basic HTTP Response Check
-  author: student
-  severity: info
-  description: Checks whether the target website responds successfully.
-
-http:
-  - method: GET
-    path:
-      - "{{BaseURL}}"
-
-    matchers:
-      - type: status
-        status:
-          - 200
-          - 301
-          - 302
-          - 403
-"""
-    with open(TEMPLATE_FILE, "w", encoding="utf-8") as file:
-        file.write(template_content)
-
-
-create_basic_template()
 
 
 def valid_url(url):
@@ -96,25 +63,29 @@ def scan():
     filename = f"scan_{timestamp}.json"
     output_path = os.path.join(RESULTS_DIR, filename)
 
+    # This matches the professor's required command:
+    # nuclei -u https://testphp.vulnweb.com
+    #
+    # Extra options are only used to store JSON results and keep Render Free stable.
     cmd = [
         "nuclei",
         "-u", target,
-        "-t", TEMPLATE_FILE,
         "-json-export", output_path,
         "-silent",
         "-c", "1",
         "-rate-limit", "2",
         "-timeout", "5",
-        "-retries", "1",
-        "-disable-update-check"
+        "-retries", "1"
     ]
+
+    command_display = f"nuclei -u {target}"
 
     try:
         scan_process = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=180
         )
 
         results = read_json_results(output_path)
@@ -139,18 +110,19 @@ def scan():
         return render_template(
             "index.html",
             target=target,
+            command_display=command_display,
             results=results,
             severity_count=severity_count,
             filename=filename,
             total_findings=len(results),
-            scan_error=scan_process.stderr,
-            scan_output=scan_process.stdout
+            scan_output=scan_process.stdout,
+            scan_error=scan_process.stderr
         )
 
     except subprocess.TimeoutExpired:
         return render_template(
             "index.html",
-            error="The scan took too long and timed out. Try a smaller target."
+            error="The scan took too long and timed out. Try again or use a smaller target."
         )
 
     except Exception as e:
