@@ -395,6 +395,7 @@ def scan():
                         pass
 
     severity_data = build_severity_data(findings)
+    scan_history = add_scan_history(target, output_filename, findings, severity_data)
 
     return render_template(
         "index.html",
