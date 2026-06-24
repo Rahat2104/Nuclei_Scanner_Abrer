@@ -338,31 +338,28 @@ def add_scan_history(target, output_file, findings, severity_data):
 
     return history
     
-@app.route("/")
-def read_findings_for_pdf(file_path):
-    findings = []
+@app.route("/pdf/<filename>")
+def download_pdf_report(filename):
+    safe_filename = secure_filename(filename)
+    file_path = os.path.join(RESULTS_DIR, safe_filename)
 
     if not os.path.exists(file_path):
-        return findings
+        return "PDF report could not be generated because the JSONL result file was not found.", 404
 
-    with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            if line.strip():
-                try:
-                    finding = json.loads(line)
+    target = request.args.get("target", "Unknown target")
 
-                    display_severity = classify_severity(finding)
-                    finding["display_severity"] = display_severity
+    findings = read_findings_for_pdf(file_path)
+    severity_data = build_severity_data(findings)
 
-                    ai_explanation = generate_ai_explanation(finding)
-                    finding["ai_explanation"] = ai_explanation
+    pdf_buffer = generate_pdf_report(target, findings, severity_data)
 
-                    findings.append(finding)
+    pdf_filename = safe_filename.replace(".jsonl", ".pdf")
 
-                except json.JSONDecodeError:
-                    pass
+    response = make_response(pdf_buffer.getvalue())
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = f"attachment; filename={pdf_filename}"
 
-    return findings
+    return response
 
 
 def safe_pdf_text(value):
